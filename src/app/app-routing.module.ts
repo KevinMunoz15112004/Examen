@@ -80,6 +80,11 @@ const routes: Routes = [
     canActivate: [AuthGuard, AdvisorGuard]
   },
   {
+    path: 'advisor/chat/:id',
+    loadChildren: () => import('./modules/advisor/advisor-chat/advisor-chat.module').then(m => m.AdvisorChatPageModule),
+    canActivate: [AuthGuard, AdvisorGuard]
+  },
+  {
     path: 'advisor/profile',
     loadChildren: () => import('./modules/advisor/profile/profile.module').then(m => m.ProfilePageModule),
     canActivate: [AuthGuard, AdvisorGuard]

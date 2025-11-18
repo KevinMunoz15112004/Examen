@@ -16,15 +16,59 @@ export class ContratacionesService {
     console.log('📝 Creando contratación para usuario_id:', usuarioId);
 
     // Usar RPC para bypassear RLS (SECURITY DEFINER)
+    // Con RETRY LOGIC para manejar delays de propagación
     return from(
-      supabase.rpc('crear_contratacion', {
-        p_usuario_id: usuarioId,
-        p_plan_id: planId,
-        p_precio_mensual: precioPlan
-      })
+      (async () => {
+        let maxRetries = 3;
+        let retryCount = 0;
+        let lastError: any = null;
+        let lastResult: any = null;
+
+        while (retryCount < maxRetries) {
+          try {
+            const delayMs = 500 + (retryCount * 500); // 500ms, 1000ms, 1500ms
+            console.log(`⏳ Intento ${retryCount + 1}/${maxRetries} - Esperando ${delayMs}ms para crear contratación...`);
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+
+            const result = await supabase.rpc('crear_contratacion', {
+              p_usuario_id: usuarioId,
+              p_plan_id: planId,
+              p_precio_mensual: precioPlan
+            });
+
+            console.log(`RPC Response intento ${retryCount + 1}:`, result);
+            lastResult = result;
+
+            // Si no hay error y la función fue exitosa, retornar resultado
+            if (!result.error) {
+              console.log(`✅ RPC exitoso en intento ${retryCount + 1}`);
+              return result;
+            }
+
+            // Si es error de FK (usuario no existe aún), reintentar
+            if (result.error?.message?.includes('foreign key')) {
+              console.log(`⚠️ Error FK en intento ${retryCount + 1}. Reintentando...`);
+              lastError = result.error;
+              retryCount++;
+            } else {
+              // Otros errores no recuperables
+              console.error(`❌ Error no recuperable en intento ${retryCount + 1}:`, result.error);
+              return result;
+            }
+          } catch (err: any) {
+            console.error(`❌ Error en intento ${retryCount + 1}:`, err);
+            lastError = err;
+            retryCount++;
+          }
+        }
+
+        // Si se agotaron los reintentos, retornar último error
+        console.error('❌ Se agotaron los reintentos. Último error:', lastError);
+        return { error: lastError || new Error('Error al crear contratación después de reintentos') };
+      })()
     ).pipe(
       switchMap(async (result: any) => {
-        console.log('RPC Response crear_contratacion:', result);
+        console.log('RPC Response crear_contratacion (después de reintentos):', result);
 
         if (!result) {
           console.error('❌ RPC retornó null/undefined');
@@ -69,6 +113,12 @@ export class ContratacionesService {
         // CASO 3: Error en respuesta JSON {success: false, error: '...'}
         if (typeof result === 'object' && result.success === false) {
           console.error('❌ Función retornó error:', result.error);
+          return null;
+        }
+
+        // CASO 4: Error de Supabase {error: {...}}
+        if (result.error) {
+          console.error('❌ Error de Supabase:', result.error);
           return null;
         }
 

@@ -1,0 +1,158 @@
+ion-toolbar {
+  --background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  --border-color: transparent;
+
+  .header-content {
+    width: 100%;
+    color: white;
+
+    ion-title {
+      color: white;
+      font-weight: bold;
+      padding: 0;
+    }
+
+    .header-subtitle {
+      font-size: 12px;
+      opacity: 0.8;
+      margin: 0;
+    }
+  }
+}
+
+ion-back-button {
+  color: white;
+}
+
+.chat-content {
+  --background: #f7f8fa;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 12px;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message {
+  display: flex;
+  animation: messageAppear 0.3s ease-out;
+
+  &.sent {
+    justify-content: flex-end;
+  }
+
+  &.received {
+    justify-content: flex-start;
+  }
+}
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  word-wrap: break-word;
+
+  .message.sent & {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .message.received & {
+    background: white;
+    color: #2c3e50;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  p {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .message-time {
+    font-size: 11px;
+    opacity: 0.7;
+  }
+
+  .message.sent & .message-time {
+    opacity: 0.85;
+  }
+}
+
+.no-messages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #95a5a6;
+
+  ion-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 16px;
+    text-align: center;
+  }
+}
+
+.message-input-container {
+  padding: 12px 16px;
+  background: white;
+  border-top: 1px solid #ecf0f1;
+}
+
+.input-wrapper {
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-end: 0;
+
+  ion-input {
+    --padding-start: 12px;
+    --padding-end: 8px;
+    font-size: 14px;
+  }
+
+  ion-button {
+    margin: 0;
+    height: 100%;
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+}
+
+ion-footer {
+  --background: white;
+}

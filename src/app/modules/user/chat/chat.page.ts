@@ -83,8 +83,11 @@ export class ChatPage implements OnInit, AfterViewChecked {
       message
     ).subscribe(
       result => {
-        if (!result) {
-          console.error('Error enviando mensaje');
+        if (result) {
+          console.log('✅ Mensaje enviado');
+
+        } else {
+          console.error('❌ Error enviando mensaje');
         }
       }
     );

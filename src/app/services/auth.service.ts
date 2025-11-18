@@ -100,29 +100,55 @@ export class AuthService {
                 const userId = data.user.id;
 
                 try {
-                    // IMPORTANTE: Esperar 500ms para que el usuario se propague en la BD
-                    // Supabase necesita tiempo para sincronizar auth.users entre servidores
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    // RETRY LOGIC: Intentar crear perfil hasta 3 veces con delay progresivo
+                    let funcResult: any = null;
+                    let funcError: any = null;
+                    let maxRetries = 3;
+                    let retryCount = 0;
 
-                    // Llamar función SQL segura que bypassa RLS
-                    // Esta función usa SECURITY DEFINER y crea el perfil sin problemas
-                    const { error: funcError, data: funcResult } = await supabase
-                        .rpc('crear_perfil_usuario', {
+                    while (retryCount < maxRetries) {
+                        // Esperar antes de intentar (500ms inicial, aumenta en cada reintento)
+                        const delayMs = 500 + (retryCount * 500); // 500ms, 1000ms, 1500ms
+                        console.log(`⏳ Intento ${retryCount + 1}/${maxRetries} - Esperando ${delayMs}ms...`);
+                        await new Promise(resolve => setTimeout(resolve, delayMs));
+
+
+                        const response = await supabase.rpc('crear_perfil_usuario', {
                             p_user_id: userId,
                             p_full_name: fullName,
                             p_phone: phone || null,
                             p_rol: 'usuario_registrado'
                         });
 
+                        funcError = response.error;
+                        funcResult = response.data;
+
+                        // Si fue exitoso o es un error de duplicado, salir del loop
+                        if (!funcError || (funcResult?.success === true) || (funcResult?.message?.includes('ya existe'))) {
+                            console.log(`✅ Intento ${retryCount + 1} exitoso`);
+                            break;
+                        }
+
+                        // Si es error de FK (usuario no disponible), reintentar
+                        if (funcError?.message?.includes('foreign key') || funcResult?.error?.includes('no disponible')) {
+                            console.log(`⚠️ Intento ${retryCount + 1} falló por FK. Reintentando...`);
+                            retryCount++;
+                        } else {
+                            // Otros errores no recuperables
+                            console.error(`❌ Error no recuperable en intento ${retryCount + 1}:`, funcError);
+                            break;
+                        }
+                    }
+
                     if (funcError) {
-                        console.error('Error en función crear_perfil_usuario:', funcError);
+                        console.error('❌ Error final en función crear_perfil_usuario:', funcError);
                         return {
                             error: `Error al crear perfil: ${funcError.message}`,
                             user: null
                         } as AuthResponse;
                     }
 
-                    console.log('Perfil creado exitosamente:', funcResult);
+                    console.log('✅ Perfil creado exitosamente:', funcResult);
 
                     // 🔥 MAPEO CORRECTO AL MODELO User
                     const mappedUser: User = {

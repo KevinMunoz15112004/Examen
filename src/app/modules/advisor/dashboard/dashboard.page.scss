@@ -51,10 +51,10 @@ ion-button {
     transition: all 0.3s ease;
 
     &.pending {
-      border-left-color: #f39c12;
+      border-left-color: #ffd700;
       
       .stat-number {
-        color: #f39c12;
+        color: #ffd700;
       }
     }
 

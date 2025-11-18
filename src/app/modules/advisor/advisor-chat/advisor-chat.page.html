@@ -1,0 +1,52 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar color="primary" class="advisor-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button (click)="goBack()" text="" defaultHref="/advisor/chat-list"></ion-back-button>
+    </ion-buttons>
+    <div class="header-content">
+      <ion-title>Chat con Cliente</ion-title>
+      <p class="header-subtitle" *ngIf="contratacionId">ID: {{ contratacionId | slice:0:8 }}...</p>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="chat-content" [scrollEvents]="true">
+  <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+
+  <div *ngIf="!isLoading" class="messages-container">
+    <div *ngFor="let msg of (mensajes$ | async)" 
+         [class]="'message ' + (isMessageFromAdvisor(msg.asesor_id) ? 'sent' : 'received')">
+      <div class="message-bubble">
+        <p>{{ msg.mensaje }}</p>
+        <span class="message-time">{{ msg.created_at | date: 'HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="!(mensajes$ | async) || (mensajes$ | async)?.length === 0" class="no-messages">
+      <ion-icon name="chatbubbles"></ion-icon>
+      <p>Inicia la conversación respondiendo al cliente</p>
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <div class="message-input-container">
+    <ion-item class="input-wrapper" lines="none">
+      <ion-input 
+        [(ngModel)]="nuevoMensaje"
+        placeholder="Escribe tu respuesta..."
+        (keyup.enter)="enviarMensaje()"
+        clearInput
+      ></ion-input>
+      <ion-button 
+        slot="end" 
+        fill="clear" 
+        color="primary"
+        (click)="enviarMensaje()"
+        [disabled]="!nuevoMensaje.trim()"
+      >
+        <ion-icon slot="icon-only" name="send"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </div>
+</ion-footer>

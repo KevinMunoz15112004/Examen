@@ -45,6 +45,6 @@ export class ChatListPage implements OnInit {
   }
 
   goToChat(contratacionId: string) {
-    this.router.navigate(['/chat', contratacionId]);
+    this.router.navigate(['/advisor/chat', contratacionId]);
   }
 }

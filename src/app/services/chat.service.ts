@@ -156,11 +156,13 @@ export class ChatService {
   getConversaciones(userId: string, isAdvisor: boolean): Observable<ConversacionChat[]> {
     const supabase = this.supabaseService.getClient();
 
-    console.log('📬 Cargando conversaciones para', isAdvisor ? 'asesor' : 'usuario');
+    console.log('📬 Cargando conversaciones para', isAdvisor ? 'asesor' : 'usuario', 'ID:', userId);
 
-    // Si es asesor, usar función RPC que respeta RLS
+    // Si es asesor, usar función RPC pasando el ID del asesor
     if (isAdvisor) {
-      return from(supabase.rpc('obtener_conversaciones_asesor')).pipe(
+      return from(supabase.rpc('obtener_conversaciones_asesor', {
+        p_asesor_id: userId
+      })).pipe(
         map((result: any) => {
           console.log('📬 Resultado RPC asesor:', result);
           if (result.error) {
@@ -196,5 +198,58 @@ export class ChatService {
       subscription.unsubscribe();
       this.subscriptions.delete(contratacionId);
     }
+  }
+
+  enviarMensajeAsesor(contratacionId: string, asesorId: string, mensaje: string): Observable<boolean> {
+    const supabase = this.supabaseService.getClient();
+
+    console.log('📤 Enviando mensaje como asesor - Contratación:', contratacionId, 'Asesor:', asesorId);
+
+    return from(supabase
+      .from('mensajes_chat')
+      .insert([{
+        contratacion_id: contratacionId,
+        usuario_id: null,
+        asesor_id: asesorId,
+        mensaje: mensaje,
+        leido: false,
+        created_at: new Date().toISOString()
+      }])
+    ).pipe(
+      map(({ error }) => {
+        if (error) {
+          console.error('❌ Error enviando mensaje como asesor:', error);
+          return false;
+        }
+        console.log('✅ Mensaje enviado como asesor');
+        return true;
+      })
+    );
+  }
+
+  getMensajes(contratacionId: string, isAdvisor: boolean = false): Observable<MensajeChat[]> {
+    const supabase = this.supabaseService.getClient();
+
+    console.log('📧 Obteniendo mensajes para contratación:', contratacionId);
+
+    return from(supabase
+      .from('mensajes_chat')
+      .select('*')
+      .eq('contratacion_id', contratacionId)
+      .order('created_at', { ascending: true })
+    ).pipe(
+      map(({ data, error }) => {
+        if (error) {
+          console.error('❌ Error cargando mensajes:', error);
+          return [];
+        }
+        console.log('✅ Mensajes obtenidos:', data?.length || 0);
+        return data as MensajeChat[];
+      })
+    );
+  }
+
+  loadMensajesManual(contratacionId: string): void {
+    this.loadMensajes(contratacionId);
   }
 }
