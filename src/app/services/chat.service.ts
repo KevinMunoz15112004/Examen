@@ -18,18 +18,15 @@ export class ChatService {
   subscribeToConversacion(contratacionId: string): Observable<MensajeChat[]> {
     const supabase = this.supabaseService.getClient();
 
-    // Validar que contratacionId no esté vacío
     if (!contratacionId || contratacionId.trim() === '') {
-      console.warn('⚠️ No hay contratacionId válido');
+      console.warn('No hay contratacionId válido');
       return this.mensajes$.asObservable();
     }
 
-    console.log('🔔 Suscribiendo a conversación:', contratacionId);
+    console.log('Suscribiendo a conversación:', contratacionId);
 
-    // Cargar mensajes iniciales
     this.loadMensajes(contratacionId);
 
-    // Suscribirse a cambios en tiempo real
     if (!this.subscriptions.has(contratacionId)) {
       const subscription = supabase
         .channel(`mensajes:${contratacionId}`)
@@ -57,14 +54,13 @@ export class ChatService {
   private loadMensajes(contratacionId: string): void {
     const supabase = this.supabaseService.getClient();
 
-    // Validar que contratacionId no esté vacío
     if (!contratacionId || contratacionId.trim() === '') {
-      console.warn('⚠️ No hay contratacionId válido para cargar mensajes');
+      console.warn('No hay contratacionId válido para cargar mensajes');
       this.mensajes$.next([]);
       return;
     }
 
-    console.log('📥 Cargando mensajes para contratación:', contratacionId);
+    console.log('Cargando mensajes para contratación:', contratacionId);
 
     from(supabase
       .from('mensajes_chat')
@@ -74,15 +70,14 @@ export class ChatService {
     ).pipe(
       map(({ data, error }) => {
         if (error) {
-          console.error('❌ Error cargando mensajes:', error);
+          console.error('Error cargando mensajes:', error);
           return [];
         }
-        console.log('✅ Mensajes cargados:', data?.length || 0);
+        console.log('Mensajes cargados:', data?.length || 0);
         return data as MensajeChat[];
       })
     ).subscribe(mensajes => {
       this.mensajes$.next(mensajes);
-      // Marcar como leídos
       this.markAsRead(contratacionId);
     });
   }
@@ -90,16 +85,15 @@ export class ChatService {
   sendMessage(contratacionId: string, usuarioId: string, asesorId: string, mensaje: string): Observable<MensajeChat | null> {
     const supabase = this.supabaseService.getClient();
 
-    console.log('📝 Enviando mensaje - Contratación:', contratacionId, 'Usuario:', usuarioId, 'Asesor:', asesorId);
+    console.log('Enviando mensaje - Contratación:', contratacionId, 'Usuario:', usuarioId, 'Asesor:', asesorId);
 
-    // Validar que los IDs no estén vacíos
     if (!contratacionId || contratacionId.trim() === '') {
-      console.error('❌ contratacion_id es requerido');
+      console.error('contratacion_id es requerido');
       return from(Promise.resolve(null));
     }
 
     if (!usuarioId || usuarioId.trim() === '') {
-      console.error('❌ usuario_id es requerido');
+      console.error('usuario_id es requerido');
       return from(Promise.resolve(null));
     }
 
@@ -118,10 +112,10 @@ export class ChatService {
     ).pipe(
       map(({ data, error }) => {
         if (error) {
-          console.error('❌ Error enviando mensaje:', error);
+          console.error('Error enviando mensaje:', error);
           return null;
         }
-        console.log('✅ Mensaje enviado exitosamente');
+        console.log('Mensaje enviado exitosamente');
         return data as MensajeChat;
       })
     );
@@ -129,14 +123,13 @@ export class ChatService {
 
   private markAsRead(contratacionId: string): void {
     const supabase = this.supabaseService.getClient();
-    
-    // Validar que contratacionId no esté vacío
+
     if (!contratacionId || contratacionId.trim() === '') {
-      console.warn('⚠️ No hay contratacionId válido para marcar como leído');
+      console.warn('No hay contratacionId válido para marcar como leído');
       return;
     }
 
-    console.log('📝 Marcando mensajes como leídos para contratación:', contratacionId);
+    console.log('Marcando mensajes como leídos para contratación:', contratacionId);
     
     supabase
       .from('mensajes_chat')
@@ -145,9 +138,9 @@ export class ChatService {
       .then(
         ({ data, error }) => {
           if (error) {
-            console.error('❌ Error marcando como leído:', error);
+            console.error('Error marcando como leído:', error);
           } else {
-            console.log('✅ Mensajes marcados como leídos');
+            console.log('Mensajes marcados como leídos');
           }
         }
       );
@@ -156,17 +149,16 @@ export class ChatService {
   getConversaciones(userId: string, isAdvisor: boolean): Observable<ConversacionChat[]> {
     const supabase = this.supabaseService.getClient();
 
-    console.log('📬 Cargando conversaciones para', isAdvisor ? 'asesor' : 'usuario', 'ID:', userId);
+    console.log('Cargando conversaciones para', isAdvisor ? 'asesor' : 'usuario', 'ID:', userId);
 
-    // Si es asesor, usar función RPC pasando el ID del asesor
     if (isAdvisor) {
       return from(supabase.rpc('obtener_conversaciones_asesor', {
         p_asesor_id: userId
       })).pipe(
         map((result: any) => {
-          console.log('📬 Resultado RPC asesor:', result);
+          console.log('Resultado RPC asesor:', result);
           if (result.error) {
-            console.error('❌ Error cargando conversaciones asesor:', result.error);
+            console.error('Error cargando conversaciones asesor:', result.error);
             return [];
           }
           return (result.data || []) as ConversacionChat[];
@@ -174,7 +166,6 @@ export class ChatService {
       );
     }
 
-    // Si es usuario, usar query normal con RLS
     return from(supabase
       .from('vw_conversaciones_chat')
       .select('*')
@@ -183,10 +174,10 @@ export class ChatService {
     ).pipe(
       map(({ data, error }) => {
         if (error) {
-          console.error('❌ Error cargando conversaciones usuario:', error);
+          console.error('Error cargando conversaciones usuario:', error);
           return [];
         }
-        console.log('✅ Conversaciones usuario cargadas:', data?.length || 0);
+        console.log('Conversaciones usuario cargadas:', data?.length || 0);
         return data as ConversacionChat[];
       })
     );
@@ -203,7 +194,7 @@ export class ChatService {
   enviarMensajeAsesor(contratacionId: string, asesorId: string, mensaje: string): Observable<boolean> {
     const supabase = this.supabaseService.getClient();
 
-    console.log('📤 Enviando mensaje como asesor - Contratación:', contratacionId, 'Asesor:', asesorId);
+    console.log('Enviando mensaje como asesor - Contratación:', contratacionId, 'Asesor:', asesorId);
 
     return from(supabase
       .from('mensajes_chat')
@@ -218,10 +209,10 @@ export class ChatService {
     ).pipe(
       map(({ error }) => {
         if (error) {
-          console.error('❌ Error enviando mensaje como asesor:', error);
+          console.error('Error enviando mensaje como asesor:', error);
           return false;
         }
-        console.log('✅ Mensaje enviado como asesor');
+        console.log('Mensaje enviado como asesor');
         return true;
       })
     );
@@ -230,7 +221,7 @@ export class ChatService {
   getMensajes(contratacionId: string, isAdvisor: boolean = false): Observable<MensajeChat[]> {
     const supabase = this.supabaseService.getClient();
 
-    console.log('📧 Obteniendo mensajes para contratación:', contratacionId);
+    console.log('Obteniendo mensajes para contratación:', contratacionId);
 
     return from(supabase
       .from('mensajes_chat')
@@ -240,10 +231,10 @@ export class ChatService {
     ).pipe(
       map(({ data, error }) => {
         if (error) {
-          console.error('❌ Error cargando mensajes:', error);
+          console.error('Error cargando mensajes:', error);
           return [];
         }
-        console.log('✅ Mensajes obtenidos:', data?.length || 0);
+        console.log('Mensajes obtenidos:', data?.length || 0);
         return data as MensajeChat[];
       })
     );

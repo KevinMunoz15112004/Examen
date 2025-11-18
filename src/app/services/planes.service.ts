@@ -178,7 +178,7 @@ export class PlanesService {
               return { error: result.error, data: null } as any;
             }
 
-            console.warn('⚠️ Unexpected RPC response format, pero sin error - asumiendo éxito:', result);
+            console.warn('Unexpected RPC response format, pero sin error - asumiendo éxito:', result);
 
             await new Promise(resolve => setTimeout(resolve, 300));
 

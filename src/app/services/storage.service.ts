@@ -7,7 +7,7 @@ import { SupabaseService } from './supabase.service';
 })
 export class StorageService {
   private supabase: SupabaseClient;
-  private readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  private readonly MAX_FILE_SIZE = 5 * 1024 * 1024; 
   private readonly ALLOWED_FORMATS = ['image/jpeg', 'image/png'];
 
   constructor(supabaseService: SupabaseService) {
@@ -16,7 +16,6 @@ export class StorageService {
 
   async uploadPlanImage(file: File, planId: string): Promise<string | null> {
     try {
-      // Validaciones
       if (!this.validateFile(file)) {
         throw new Error('Archivo no válido. Solo se aceptan JPG/PNG con máximo 5MB');
       }
@@ -24,7 +23,6 @@ export class StorageService {
       const fileName = `plan-${planId}-${Date.now()}.${file.name.split('.').pop()}`;
       const filePath = `planes/${fileName}`;
 
-      // Convertir File a ArrayBuffer para mejor compatibilidad
       const arrayBuffer = await file.arrayBuffer();
       
       const { error, data } = await this.supabase.storage
@@ -42,11 +40,9 @@ export class StorageService {
           status: (error as any).status,
           statusCode: (error as any).statusCode
         });
-        // Si falla el upload, retornar null para permitir crear plan sin imagen
         return null;
       }
 
-      // Obtener URL pública
       const { data: publicUrl } = this.supabase.storage
         .from('planes-imagenes')
         .getPublicUrl(filePath);
@@ -54,7 +50,6 @@ export class StorageService {
       return publicUrl.publicUrl;
     } catch (error) {
       console.error('Error en uploadPlanImage:', error);
-      // No lanzar error, permitir que el plan se cree sin imagen
       return null;
     }
   }
@@ -63,7 +58,6 @@ export class StorageService {
     try {
       if (!filePath) return false;
 
-      // Extraer la ruta del archivo de la URL pública si es necesario
       let path = filePath;
       if (filePath.includes('planes-imagenes')) {
         const parts = filePath.split('planes-imagenes/');

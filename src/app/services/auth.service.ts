@@ -19,14 +19,12 @@ export class AuthService {
     private initializeAuth(): void {
         const supabase = this.supabaseService.getClient();
 
-        // Verificar sesión existente
         supabase.auth.getSession().then(({ data }) => {
             if (data.session?.user) {
                 this.loadUserProfile(data.session.user.id);
             }
         });
 
-        // Escuchar cambios de autenticación
         supabase.auth.onAuthStateChange((event, session) => {
             if (session?.user) {
                 this.loadUserProfile(session.user.id);
@@ -41,14 +39,12 @@ export class AuthService {
     private loadUserProfile(userId: string): void {
         const supabase = this.supabaseService.getClient();
 
-        // Primero, obtener el email del usuario autenticado
         supabase.auth.getUser().then(({ data: { user }, error: userError }) => {
             if (userError || !user) {
                 console.error('Error getting user:', userError);
                 return;
             }
 
-            // Luego, obtener el perfil del usuario
             from(supabase
                 .from('perfiles')
                 .select('*')
@@ -59,7 +55,7 @@ export class AuthService {
                     if (error || !data) return null;
                     return {
                         id: data.user_id,
-                        email: user.email || '', // Usar el email del usuario autenticado
+                        email: user.email || '', 
                         full_name: data.full_name,
                         phone: data.phone,
                         role: data.rol as UserRole,
@@ -100,15 +96,13 @@ export class AuthService {
                 const userId = data.user.id;
 
                 try {
-                    // RETRY LOGIC: Intentar crear perfil hasta 3 veces con delay progresivo
                     let funcResult: any = null;
                     let funcError: any = null;
                     let maxRetries = 3;
                     let retryCount = 0;
 
                     while (retryCount < maxRetries) {
-                        // Esperar antes de intentar (500ms inicial, aumenta en cada reintento)
-                        const delayMs = 500 + (retryCount * 500); // 500ms, 1000ms, 1500ms
+                        const delayMs = 500 + (retryCount * 500); 
                         console.log(`⏳ Intento ${retryCount + 1}/${maxRetries} - Esperando ${delayMs}ms...`);
                         await new Promise(resolve => setTimeout(resolve, delayMs));
 
@@ -123,34 +117,30 @@ export class AuthService {
                         funcError = response.error;
                         funcResult = response.data;
 
-                        // Si fue exitoso o es un error de duplicado, salir del loop
                         if (!funcError || (funcResult?.success === true) || (funcResult?.message?.includes('ya existe'))) {
-                            console.log(`✅ Intento ${retryCount + 1} exitoso`);
+                            console.log(`Intento ${retryCount + 1} exitoso`);
                             break;
                         }
 
-                        // Si es error de FK (usuario no disponible), reintentar
                         if (funcError?.message?.includes('foreign key') || funcResult?.error?.includes('no disponible')) {
                             console.log(`⚠️ Intento ${retryCount + 1} falló por FK. Reintentando...`);
                             retryCount++;
                         } else {
-                            // Otros errores no recuperables
-                            console.error(`❌ Error no recuperable en intento ${retryCount + 1}:`, funcError);
+                            console.error(`Error no recuperable en intento ${retryCount + 1}:`, funcError);
                             break;
                         }
                     }
 
                     if (funcError) {
-                        console.error('❌ Error final en función crear_perfil_usuario:', funcError);
+                        console.error('Error final en función crear_perfil_usuario:', funcError);
                         return {
                             error: `Error al crear perfil: ${funcError.message}`,
                             user: null
                         } as AuthResponse;
                     }
 
-                    console.log('✅ Perfil creado exitosamente:', funcResult);
+                    console.log('Perfil creado exitosamente:', funcResult);
 
-                    // 🔥 MAPEO CORRECTO AL MODELO User
                     const mappedUser: User = {
                         id: data.user.id,
                         email: data.user.email ?? '',
@@ -190,10 +180,8 @@ export class AuthService {
         })).pipe(
             switchMap(({ data, error }) => {
                 if (error) {
-                    // Manejar errores de lock manager
                     if (error.message && error.message.includes('NavigatorLock')) {
                         console.warn('Lock manager error, retrying...', error);
-                        // Reintentar después de un pequeño delay
                         return Promise.resolve({ error: 'Intenta nuevamente. Error de sincronización.' } as AuthResponse);
                     }
                     return Promise.resolve({ error: error.message } as AuthResponse);
@@ -209,7 +197,6 @@ export class AuthService {
                 console.error('Login error:', err);
                 const errorMessage = err?.message || 'Error al iniciar sesión';
 
-                // Manejar errores de lock manager
                 if (errorMessage.includes('NavigatorLock') || errorMessage.includes('lock')) {
                     return Promise.resolve({ error: 'Intenta nuevamente. Por favor espera un momento.' } as AuthResponse);
                 }
@@ -222,10 +209,8 @@ export class AuthService {
     loginAdvisor(email: string, password: string): Observable<AuthResponse> {
         const supabase = this.supabaseService.getClient();
 
-        // Primero, cerrar cualquier sesión activa para evitar conflictos
         return from(supabase.auth.signOut()).pipe(
             switchMap(() => {
-                // Luego, buscar en la tabla de asesores
                 return from(supabase
                     .from('asesores')
                     .select('*')
@@ -239,7 +224,6 @@ export class AuthService {
                 }
 
                 try {
-                    // Obtener el campo de contraseña (puede ser password o password_hash)
                     const passwordField = advisor.password || advisor.password_hash;
 
                     if (!passwordField) {
@@ -249,11 +233,9 @@ export class AuthService {
 
                     let isPasswordValid = false;
 
-                    // Si la contraseña parece estar hasheada (comienza con $2a$ o $2b$), usar bcryptjs
                     if (passwordField.startsWith('$2a$') || passwordField.startsWith('$2b$')) {
                         isPasswordValid = await bcryptjs.compare(password, passwordField);
                     } else {
-                        // Si no está hasheada, comparar directamente (para pruebas)
                         isPasswordValid = password === passwordField;
                     }
 
@@ -261,12 +243,10 @@ export class AuthService {
                         return { error: 'Contraseña incorrecta' } as AuthResponse;
                     }
 
-                    // Validar que el asesor está activo
                     if (advisor.activo === false) {
                         return { error: 'Asesor inactivo' } as AuthResponse;
                     }
 
-                    // Crear objeto de usuario para el asesor
                     const asesorUser: User = {
                         id: advisor.id,
                         email: advisor.email,
@@ -278,11 +258,9 @@ export class AuthService {
                         updated_at: advisor.updated_at
                     };
 
-                    // Actualizar estado global del usuario
                     this.currentUser$.next(asesorUser);
                     this.isAuthenticated$.next(true);
 
-                    // Retornar datos del asesor
                     return {
                         user: asesorUser
                     } as AuthResponse;
@@ -301,11 +279,9 @@ export class AuthService {
                 this.currentUser$.next(null);
                 this.isAuthenticated$.next(false);
 
-                // Limpiar almacenamiento
                 localStorage.clear();
                 sessionStorage.clear();
-                
-                // Forzar recarga de página para limpiar completamente
+               
                 setTimeout(() => {
                     window.location.reload();
                 }, 300);

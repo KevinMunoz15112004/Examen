@@ -23,17 +23,14 @@ export class SupabaseService {
       },
     });
 
-    // Manejar errores de lock manager
     this.initializeLockErrorHandler();
   }
 
   private initializeLockErrorHandler(): void {
-    // Escuchar errores de lock manager del navegador
     if (window && typeof window !== 'undefined') {
       window.addEventListener('error', (event: ErrorEvent) => {
         if (event.message && event.message.includes('NavigatorLock')) {
           console.warn('Lock Manager error detected:', event.message);
-          // No propagar el error, solo registrarlo
           event.preventDefault();
         }
       });
@@ -42,7 +39,6 @@ export class SupabaseService {
         if (event.reason && typeof event.reason === 'object' && 
             event.reason.message && event.reason.message.includes('NavigatorLock')) {
           console.warn('Unhandled Lock Manager rejection:', event.reason);
-          // No propagar el rechazo
           event.preventDefault();
         }
       });
