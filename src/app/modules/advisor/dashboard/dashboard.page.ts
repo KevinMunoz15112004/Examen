@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
@@ -6,8 +6,8 @@ import { AuthService } from '../../../services/auth.service';
 import { PlanesService } from '../../../services/planes.service';
 import { ContratacionesService } from '../../../services/contrataciones.service';
 import { User, Plan, ContratacionDetalle } from '../../../models';
-import { Observable, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, combineLatest, Subject } from 'rxjs';
+import { map, takeUntil, switchMap, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,11 +16,13 @@ import { map } from 'rxjs/operators';
   standalone: true,
   imports: [CommonModule, IonicModule]
 })
-export class DashboardPage implements OnInit {
+export class DashboardPage implements OnInit, OnDestroy {
   currentUser$: Observable<User | null>;
   planes$: Observable<Plan[]>;
   todasLasContrataciones$: Observable<ContratacionDetalle[]>;
   stats$: Observable<any>;
+  private destroy$ = new Subject<void>();
+  private refreshSubject = new Subject<void>();
 
   constructor(
     private authService: AuthService,
@@ -30,7 +32,12 @@ export class DashboardPage implements OnInit {
   ) {
     this.currentUser$ = this.authService.getCurrentUser();
     this.planes$ = this.planesService.getPlanes();
-    this.todasLasContrataciones$ = this.contratacionesService.getTodasLasContrataciones();
+    
+    // Combinar el refresh manual con las notificaciones de actualización de contrataciones
+    this.todasLasContrataciones$ = this.refreshSubject.pipe(
+      startWith(undefined),
+      switchMap(() => this.contratacionesService.getTodasLasContrataciones())
+    );
 
     this.stats$ = combineLatest([
       this.planes$,
@@ -60,7 +67,20 @@ export class DashboardPage implements OnInit {
     );
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    // Escuchar cambios en contrataciones y refrescar automáticamente
+    this.contratacionesService.contratacionActualizada$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        console.log('🔄 Detectado cambio en contratación. Refrescando stats...');
+        this.refreshSubject.next(undefined);
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   goToCreatePlan() {
     this.router.navigate(['/advisor/plan-form']);

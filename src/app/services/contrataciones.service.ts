@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, from, of } from 'rxjs';
-import { map, switchMap, catchError } from 'rxjs/operators';
+import { Observable, from, of, Subject } from 'rxjs';
+import { map, switchMap, catchError, tap } from 'rxjs/operators';
 import { SupabaseService } from './supabase.service';
 import { Contratacion, ContratacionDetalle } from '../models';
 
@@ -8,6 +8,10 @@ import { Contratacion, ContratacionDetalle } from '../models';
   providedIn: 'root'
 })
 export class ContratacionesService {
+  // Subject para notificar cambios en contrataciones
+  private contratacionActualizadaSubject = new Subject<{ id: string; nuevoEstado: string }>();
+  contratacionActualizada$ = this.contratacionActualizadaSubject.asObservable();
+
   constructor(private supabaseService: SupabaseService) {}
 
   createContratacion(usuarioId: string, planId: string, precioPlan: number): Observable<Contratacion | null> {
@@ -239,6 +243,8 @@ export class ContratacionesService {
         // Verificar si la actualización fue exitosa
         if (responseData && responseData.success === true) {
           console.log('✅ Estado actualizado correctamente. Filas afectadas:', responseData.rows_affected);
+          // 🔔 Notificar que la contratación fue actualizada
+          this.contratacionActualizadaSubject.next({ id: contratacionId, nuevoEstado });
           return true;
         } else {
           console.error('❌ Error en RPC:', responseData?.error || 'sin error detallado');

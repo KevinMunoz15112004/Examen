@@ -110,15 +110,50 @@ ion-back-button {
   --padding-start: 0;
   --padding-end: 0;
   --inner-padding-end: 0;
-  margin-bottom: 0;
+  margin-bottom: 12px;
   --background: transparent;
+  border-bottom: 1px solid #ecf0f1;
+  padding: 0 16px;
+
+  ion-label {
+    font-size: 12px !important;
+    font-weight: 600;
+    color: #7f8c8d;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 
   ion-input,
   ion-textarea,
   ion-select {
-    --padding-start: 12px;
-    --padding-end: 12px;
-    padding: 8px 0;
+    --padding-start: 0;
+    --padding-end: 0;
+    padding: 12px 0 8px 0;
+    font-size: 14px;
+    --color: #2c3e50;
+
+    &::placeholder {
+      color: #bdc3c7;
+      font-style: italic;
+      opacity: 0.8;
+    }
+  }
+
+  ion-input {
+    --placeholder-color: #bdc3c7;
+  }
+
+  ion-textarea {
+    --placeholder-color: #bdc3c7;
+
+    &::placeholder {
+      font-size: 13px;
+    }
+  }
+
+  &:last-child {
+    border-bottom: none;
   }
 }
 

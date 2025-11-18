@@ -1,4 +1,3 @@
-// Variables de color
 $primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 $bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 $success-color: #27ae60;
@@ -8,7 +7,6 @@ $text-light: #7f8c8d;
 $border-color: #ecf0f1;
 $white: #ffffff;
 
-// Estilos globales
 ion-toolbar {
   --background: #{$primary-gradient};
   --border-color: transparent;
@@ -27,7 +25,6 @@ ion-back-button {
   --icon-font-size: 24px;
 }
 
-// Contenedor principal
 .auth-container {
   --background: #{$bg-gradient};
   animation: fadeIn 0.5s ease-out;
@@ -94,7 +91,6 @@ ion-back-button {
   }
 }
 
-// Tabs de autenticación
 .auth-tabs {
   display: flex;
   gap: 8px;
@@ -131,8 +127,9 @@ ion-back-button {
   }
 }
 
-// Formularios
+
 .auth-form {
+  padding: 0 9px;
   margin-bottom: 24px;
   animation: slideUpFade 0.5s ease-out;
 }
@@ -354,6 +351,7 @@ ion-back-button {
 
 // Selección de Roles
 .role-selection {
+  padding: 0 20px;
   animation: slideUpFade 0.5s ease-out;
   text-align: center;
   margin-top: 20px;
