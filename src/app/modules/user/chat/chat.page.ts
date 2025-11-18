@@ -37,7 +37,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
     private contratacionesService: ContratacionesService
   ) {
     this.currentUser$ = this.authService.getCurrentUser();
-    this.mensajes$ = this.chatService.subscribeToConversacion('');
+    this.mensajes$ = new Observable(subscriber => subscriber.next([])); // Inicializar vacío
   }
 
   ngOnInit() {
