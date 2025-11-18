@@ -10,7 +10,6 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="home-content">
-  <!-- User Welcome Card -->
   <div class="welcome-card" *ngIf="currentUser$ | async as user">
     <div class="welcome-content">
       <h1>¡Bienvenido, <span>{{ user.full_name }}</span>!</h1>
@@ -21,7 +20,6 @@
     </div>
   </div>
 
-  <!-- Quick Actions -->
   <div class="quick-actions">
     <ion-card class="action-card" (click)="goToMisContrataciones()">
       <ion-card-content>
@@ -40,7 +38,6 @@
     </ion-card>
   </div>
 
-  <!-- Featured Plans -->
   <div class="featured-section">
     <h2>Planes Recomendados</h2>
     <ion-slides [options]="slideOpts" class="featured-slider">
@@ -64,7 +61,6 @@
     </ion-slides>
   </div>
 
-  <!-- All Plans Grid -->
   <div class="all-plans-section">
     <h2>Todos Nuestros Planes</h2>
     <div class="plans-grid">

@@ -152,6 +152,41 @@ ion-button {
   }
 }
 
+.pending-contracts-card {
+
+  margin: 0 0 12px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-left: 4px solid #ffd700;
+
+    ion-card-content {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .action-icon {
+        font-size: 40px;
+        color: #ffd700;
+        min-width: 40px;
+      }
+
+      h3 {
+        font-size: 14px;
+        font-weight: bold;
+        margin: 0 0 4px 0;
+        color: #2c3e50;
+      }
+
+      p {
+        font-size: 12px;
+        color: #7f8c8d;
+        margin: 0;
+      }
+    }
+  }
+
 .plans-section {
   padding: 16px;
 

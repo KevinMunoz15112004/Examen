@@ -122,13 +122,11 @@ export class PlanFormPage implements OnInit {
       if (uploadedUrl) {
         imageUrl = uploadedUrl;
       } else {
-        // Si falla el upload, mostrar advertencia pero continuar
         await this.presentToast('No se pudo subir la imagen, el plan se creará sin imagen', 'warning');
       }
     }
 
     if (this.editingPlanId && this.currentUser) {
-      // Actualizar plan
       const updateData = {
         ...formData,
         imagen_url: imageUrl
@@ -146,10 +144,9 @@ export class PlanFormPage implements OnInit {
         }
       );
     } else if (this.currentUser) {
-      // Crear nuevo plan (con o sin imagen)
       const newPlan = {
         ...formData,
-        imagen_url: imageUrl || null,  // Puede ser NULL si falla el upload
+        imagen_url: imageUrl || null, 
         created_by: this.currentUser.id
       };
 

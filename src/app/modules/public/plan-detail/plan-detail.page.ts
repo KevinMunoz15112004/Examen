@@ -52,25 +52,24 @@ export class PlanDetailPage implements OnInit {
     console.log('🔍 contratarPlan() - Iniciando...');
     
     try {
-      // Obtener usuario actual usando Observable
       this.authService.getCurrentUser().subscribe(
         async (user) => {
           console.log('👤 Usuario obtenido:', user?.id);
 
           if (!user) {
-            console.warn('⚠️ No hay usuario autenticado');
+            console.warn('No hay usuario autenticado');
             await this.presentToast('Debes estar autenticado para contratar', 'warning');
             await this.router.navigate(['/login']);
             return;
           }
 
           if (!this.plan) {
-            console.error('❌ Plan no disponible');
+            console.error('Plan no disponible');
             await this.presentToast('Error: Plan no disponible', 'danger');
             return;
           }
 
-          console.log('📋 Plan a contratar:', this.plan.id, this.plan.nombre);
+          console.log('Plan a contratar:', this.plan.id, this.plan.nombre);
 
           const alert = await this.alertController.create({
             header: 'Confirmar Contratación',
@@ -83,10 +82,10 @@ export class PlanDetailPage implements OnInit {
               {
                 text: 'Confirmar',
                 handler: async () => {
-                  console.log('✅ Usuario confirmó - Creando contratación...');
+                  console.log('Usuario confirmó - Creando contratación...');
                   this.contratacionesService.createContratacion(user.id, this.plan!.id, this.plan!.precio).subscribe(
                     async (contratacion) => {
-                      console.log('📢 Respuesta del service:', contratacion);
+                      console.log('Respuesta del service:', contratacion);
                       if (contratacion) {
                         await this.presentToast('¡Contratación completada!', 'success');
                         await this.router.navigate(['/mis-contrataciones']);
@@ -95,7 +94,7 @@ export class PlanDetailPage implements OnInit {
                       }
                     },
                     async (error) => {
-                      console.error('❌ Error en contratación:', error);
+                      console.error('Error en contratación:', error);
                       await this.presentToast('Error en la contratación', 'danger');
                     }
                   );
@@ -104,16 +103,16 @@ export class PlanDetailPage implements OnInit {
             ],
           });
 
-          console.log('📣 Mostrando alerta...');
+          console.log('Mostrando alerta...');
           await alert.present();
         },
         (error) => {
-          console.error('💥 Error obteniendo usuario:', error);
+          console.error('Error obteniendo usuario:', error);
           this.presentToast('Error al obtener usuario', 'danger');
         }
       );
     } catch (error) {
-      console.error('💥 Error en contratarPlan():', error);
+      console.error('Error en contratarPlan():', error);
       this.presentToast('Error al procesar contratación', 'danger');
     }
   }

@@ -7,7 +7,7 @@ import { AuthService } from '../../../services/auth.service';
 import { ChatService } from '../../../services/chat.service';
 import { ContratacionesService } from '../../../services/contrataciones.service';
 import { User, MensajeChat, Contratacion } from '../../../models';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-chat',
@@ -28,6 +28,8 @@ export class ChatPage implements OnInit, AfterViewChecked {
   asesorId = '';
   isLoading = true;
   shouldScroll = false;
+  private pollingInterval: any = null;
+  private userSub?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -37,7 +39,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
     private contratacionesService: ContratacionesService
   ) {
     this.currentUser$ = this.authService.getCurrentUser();
-    this.mensajes$ = new Observable(subscriber => subscriber.next([])); // Inicializar vacío
+    this.mensajes$ = new Observable(subscriber => subscriber.next([]));
   }
 
   ngOnInit() {
@@ -51,7 +53,10 @@ export class ChatPage implements OnInit, AfterViewChecked {
             if (contratacion) {
               this.contratacion = contratacion;
               this.asesorId = contratacion.usuario_id === user.id ? '' : contratacion.usuario_id;
-              this.mensajes$ = this.chatService.subscribeToConversacion(this.contratacionId);
+              this.loadMensajes();
+
+              // Iniciar polling
+              this.startPolling();
               this.isLoading = false;
             }
           }
@@ -64,6 +69,29 @@ export class ChatPage implements OnInit, AfterViewChecked {
     if (this.shouldScroll) {
       this.scrollToBottom();
       this.shouldScroll = false;
+    }
+  }
+
+  private loadMensajes() {
+    this.mensajes$ = this.chatService.subscribeToConversacion(this.contratacionId);
+  }
+
+
+  private startPolling() {
+    if (this.pollingInterval) {
+      return;
+    }
+
+    this.pollingInterval = setInterval(() => {
+      console.log('🔄 Recargando mensajes por polling');
+      this.loadMensajes();
+    }, 3000);
+  }
+
+  private stopPolling() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
     }
   }
 
@@ -84,10 +112,10 @@ export class ChatPage implements OnInit, AfterViewChecked {
     ).subscribe(
       result => {
         if (result) {
-          console.log('✅ Mensaje enviado');
+          console.log('Mensaje enviado');
 
         } else {
-          console.error('❌ Error enviando mensaje');
+          console.error('Error enviando mensaje');
         }
       }
     );
@@ -106,5 +134,10 @@ export class ChatPage implements OnInit, AfterViewChecked {
 
   isMessageFromCurrentUser(usuarioId: string): boolean {
     return usuarioId === this.currentUserId;
+  }
+
+  ngOnDestroy() {
+    this.stopPolling();
+    this.userSub?.unsubscribe();
   }
 }

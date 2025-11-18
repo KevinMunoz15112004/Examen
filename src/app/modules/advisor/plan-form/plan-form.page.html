@@ -11,7 +11,6 @@
   <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
 
   <form [formGroup]="planForm" (ngSubmit)="submitForm()" *ngIf="!isLoading" class="form-container">
-    <!-- Image Upload Section -->
     <div class="image-section">
       <div class="image-upload-area" *ngIf="!imagePreview">
         <ion-icon name="image"></ion-icon>
@@ -48,7 +47,6 @@
       </div>
     </div>
 
-    <!-- Basic Information -->
     <ion-card class="form-card">
       <ion-card-header>
         <ion-card-title>Información Básica</ion-card-title>
@@ -93,7 +91,6 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Technical Specifications -->
     <ion-card class="form-card">
       <ion-card-header>
         <ion-card-title>Características Técnicas</ion-card-title>
@@ -182,7 +179,6 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Status -->
     <ion-card class="form-card">
       <ion-card-content>
         <ion-item>
@@ -195,7 +191,6 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Submit Buttons -->
     <div class="button-group">
       <ion-button 
         expand="block" 

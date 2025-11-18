@@ -39,7 +39,6 @@ export class AuthPage implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
 
-    // Solo registro para usuarios normales
     this.registerForm = this.fb.group({
       fullName: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
@@ -70,7 +69,6 @@ export class AuthPage implements OnInit {
     this.isLoadingLogin = true;
     const { email, password } = this.loginForm.value;
 
-    // Lógica diferenciada por rol
     if (this.selectedRole === 'usuario') {
       this.loginAsUser(email, password);
     } else if (this.selectedRole === 'asesor') {
@@ -85,7 +83,6 @@ export class AuthPage implements OnInit {
         if (response.error) {
           await this.presentToast(response.error, 'danger');
         } else {
-          // Verificar que sea usuario normal (no asesor)
           this.authService.isAdvisor().subscribe(async isAdvisor => {
             if (!isAdvisor) {
               await this.presentToast('¡Bienvenido!', 'success');
@@ -114,7 +111,6 @@ export class AuthPage implements OnInit {
           await this.presentToast(response.error, 'danger');
         } else if (response.user) {
           await this.presentToast('¡Bienvenido Asesor!', 'success');
-          // Esperar un poco para que el estado se actualice
           setTimeout(() => {
             this.router.navigate(['/advisor/dashboard']).then(() => {
               this.resetAuth();
@@ -152,7 +148,6 @@ export class AuthPage implements OnInit {
     this.isLoadingRegister = true;
     const { fullName, email, phone, password } = this.registerForm.value;
 
-    // El registro es solo para usuarios normales
     this.authService.register(email, password, fullName, phone).subscribe(
       async response => {
         this.isLoadingRegister = false;

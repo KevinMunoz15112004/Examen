@@ -50,7 +50,6 @@ ion-back-button {
   z-index: -1;
 }
 
-// Sección del logo
 .logo-section {
   text-align: center;
   margin-top: 30px;
@@ -127,10 +126,9 @@ ion-back-button {
   }
 }
 
-
 .auth-form {
   padding: 0 9px;
-  margin-bottom: 24px;
+  margin-bottom: 40%;
   animation: slideUpFade 0.5s ease-out;
 }
 
@@ -207,7 +205,6 @@ ion-back-button {
   75% { transform: translateX(4px); }
 }
 
-// Checkbox de términos
 .terms-container {
   margin-bottom: 24px;
   padding: 16px;
@@ -240,7 +237,6 @@ ion-back-button {
   }
 }
 
-// Botón de envío
 .auth-button {
   height: 52px;
   font-weight: 700;
@@ -269,7 +265,6 @@ ion-back-button {
   }
 }
 
-// Footer
 .auth-footer {
   text-align: center;
   margin-top: 32px;

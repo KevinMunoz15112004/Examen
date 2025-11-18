@@ -1,41 +1,40 @@
+ion-content.splash-container {
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
 .splash-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  justify-content: center; 
+  align-items: center;  
+  height: 100vh;         
+  text-align: center;      
+  padding: 0 50px;    
 }
 
 .splash-content {
+  display: flex;
+  flex-direction: column;     
+  justify-content: center;   
+  align-items: center;       
+  height: 100%;               
   text-align: center;
-  color: white;
-}
-
-.logo-container {
-  margin-bottom: 30px;
+  padding: 0 50px;          
 }
 
 .logo-text {
-  font-size: 48px;
+  font-size: 3rem; 
   font-weight: bold;
-  margin: 0;
-  letter-spacing: 2px;
+  
+  background: linear-gradient(to bottom, #0000ff, #ff0000);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text; 
+  -webkit-text-fill-color: transparent;
 }
 
-.logo-text .conecta {
-  display: block;
-  font-size: 32px;
-  color: #ffd700;
-  margin-top: 10px;
-}
-
-.tagline {
-  font-size: 18px;
-  margin: 20px 0 40px 0;
-  opacity: 0.9;
-}
-
-.spinner {
-  --color: #ffd700;
-  margin-top: 40px;
+.conecta {
+  font-weight: normal;
 }

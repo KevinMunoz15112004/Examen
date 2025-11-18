@@ -33,7 +33,6 @@ export class DashboardPage implements OnInit, OnDestroy {
     this.currentUser$ = this.authService.getCurrentUser();
     this.planes$ = this.planesService.getPlanes();
     
-    // Combinar el refresh manual con las notificaciones de actualización de contrataciones
     this.todasLasContrataciones$ = this.refreshSubject.pipe(
       startWith(undefined),
       switchMap(() => this.contratacionesService.getTodasLasContrataciones())
@@ -68,7 +67,6 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Escuchar cambios en contrataciones y refrescar automáticamente
     this.contratacionesService.contratacionActualizada$
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {

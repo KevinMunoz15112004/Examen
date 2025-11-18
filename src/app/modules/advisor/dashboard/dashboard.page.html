@@ -10,13 +10,11 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="dashboard-content">
-  <!-- Welcome Section -->
   <div class="welcome-section" *ngIf="currentUser$ | async as user">
     <h1>¡Bienvenido, {{ user.full_name }}!</h1>
     <p>Gestiona tus planes y contrataciones</p>
   </div>
 
-  <!-- Statistics -->
   <div class="stats-grid" *ngIf="stats$ | async as stats">
     <ion-card class="stat-card pending">
       <div class="stat-number">{{ stats.contratacionesPendientes }}</div>
@@ -32,7 +30,6 @@
     </ion-card>
   </div>
 
-  <!-- Main Actions -->
   <div class="actions-section">
     <ion-card class="action-card" (click)="goToCreatePlan()">
       <ion-card-content>
@@ -44,7 +41,7 @@
       </ion-card-content>
     </ion-card>
 
-    <ion-card class="action-card" (click)="goToPendingContracts()">
+    <ion-card class="pending-contracts-card" (click)="goToPendingContracts()">
       <ion-card-content>
         <div class="action-icon">
           <ion-icon name="clipboard"></ion-icon>
@@ -85,7 +82,6 @@
     </ion-card>
   </div>
 
-  <!-- Your Plans -->
   <div class="plans-section">
     <h2>Tus Planes</h2>
     <div class="plans-list">

@@ -7,6 +7,7 @@ import { Plan } from '../../../models';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { IonicModule } from '@ionic/angular';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-catalog',
@@ -41,7 +42,7 @@ export class CatalogPage implements OnInit {
     this.isAuthenticated$ = this.authService.isAuthenticated();
   }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   goToDetail(planId: string) {
     this.router.navigate(['/plan-detail', planId]);
@@ -56,12 +57,17 @@ export class CatalogPage implements OnInit {
   }
 
   onProfileClick() {
-    const isAuth = this.isAuthenticated$ ? true : false;
-    if (isAuth) {
-      this.goToHome();
-    } else {
-      this.goToLogin();
-    }
+    this.isAuthenticated$.pipe(take(1)).subscribe(isAuth => {
+      if (isAuth) {
+        this.goToProfile();
+      } else {
+        this.goToLogin();
+      }
+    });
+  }
+
+  goToProfile() {
+    this.router.navigate(['/profile']);
   }
 
   filterBySegment(event: any) {

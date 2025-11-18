@@ -1,18 +1,15 @@
 <ion-header [translucent]="true" class="ion-no-border">
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button *ngIf="!showRoleSelection" (click)="goBackToRoleSelection()" defaultHref="/splash" text=""></ion-back-button>
-      <ion-back-button *ngIf="showRoleSelection" defaultHref="/splash" text=""></ion-back-button>
+      <ion-back-button *ngIf="!showRoleSelection" (click)="goBackToRoleSelection()" defaultHref="/login" text=""></ion-back-button>
     </ion-buttons>
     <ion-title>TIGO Conecta</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="auth-container">
-  <!-- Background Gradient -->
   <div class="gradient-bg"></div>
 
-  <!-- Logo Section -->
   <div class="logo-section">
     <div class="logo-circle">
       <ion-icon name="phone-portrait-outline"></ion-icon>
@@ -21,7 +18,6 @@
     <p class="tagline">Gestiona tus planes móviles</p>
   </div>
 
-  <!-- Role Selection Screen -->
   <div *ngIf="showRoleSelection" class="role-selection">
     <h2>¿Cómo deseas ingresar?</h2>
     <p class="subtitle">Selecciona tu tipo de acceso</p>
@@ -49,9 +45,7 @@
     </div>
   </div>
 
-  <!-- Login/Register Forms -->
   <div *ngIf="!showRoleSelection">
-    <!-- Toggle Tabs - Solo mostrar registro si es usuario normal -->
     <div class="auth-tabs" *ngIf="selectedRole === 'usuario'">
       <button
         [class.active]="!showRegister"
@@ -69,17 +63,14 @@
       </button>
     </div>
 
-    <!-- Login Form -->
     <form *ngIf="!showRegister || selectedRole === 'asesor'" [formGroup]="loginForm" (ngSubmit)="login()" class="auth-form">
       <ion-card class="form-card">
         <ion-card-content>
-          <!-- Role Display -->
           <div class="role-display" [class.usuario]="selectedRole === 'usuario'" [class.asesor]="selectedRole === 'asesor'">
             <ion-icon [name]="selectedRole === 'asesor' ? 'briefcase' : 'person'"></ion-icon>
             <span>{{ selectedRole === 'asesor' ? 'Ingreso como Asesor' : 'Ingreso como Usuario' }}</span>
           </div>
 
-          <!-- Email -->
           <ion-item class="input-item">
             <ion-label position="floating">Correo Electrónico</ion-label>
             <ion-input
@@ -96,7 +87,6 @@
             Ingresa un correo válido
           </div>
 
-          <!-- Password -->
           <ion-item class="input-item">
             <ion-label position="floating">Contraseña</ion-label>
             <ion-input
@@ -110,7 +100,6 @@
             La contraseña es requerida
           </div>
 
-          <!-- Submit Button -->
           <ion-button
             expand="block"
             color="primary"
@@ -125,11 +114,9 @@
       </ion-card>
     </form>
 
-    <!-- Register Form -->
     <form *ngIf="showRegister" [formGroup]="registerForm" (ngSubmit)="register()" class="auth-form">
       <ion-card class="form-card">
         <ion-card-content>
-          <!-- Full Name -->
           <ion-item class="input-item">
             <ion-label position="floating">Nombre Completo</ion-label>
             <ion-input
@@ -143,7 +130,6 @@
             El nombre es requerido
           </div>
 
-          <!-- Email -->
           <ion-item class="input-item">
             <ion-label position="floating">Correo Electrónico</ion-label>
             <ion-input
@@ -160,7 +146,6 @@
             Ingresa un correo válido
           </div>
 
-          <!-- Phone -->
           <ion-item class="input-item">
             <ion-label position="floating">Teléfono</ion-label>
             <ion-input
@@ -170,7 +155,6 @@
             ></ion-input>
           </ion-item>
 
-          <!-- Password -->
           <ion-item class="input-item">
             <ion-label position="floating">Contraseña</ion-label>
             <ion-input
@@ -184,7 +168,6 @@
             La contraseña es requerida
           </div>
 
-          <!-- Confirm Password -->
           <ion-item class="input-item">
             <ion-label position="floating">Confirmar Contraseña</ion-label>
             <ion-input
@@ -201,7 +184,6 @@
             Las contraseñas no coinciden
           </div>
 
-          <!-- Terms Checkbox -->
           <div class="terms-container">
             <ion-checkbox
               formControlName="terms"
@@ -214,7 +196,6 @@
             Debes aceptar los términos y condiciones
           </div>
 
-          <!-- Submit Button -->
           <ion-button
             expand="block"
             color="primary"
@@ -229,8 +210,7 @@
       </ion-card>
     </form>
 
-    <!-- Footer -->
-    <div class="auth-footer">
+    <div class="auth-footer" *ngIf="selectedRole !== 'asesor'">
       <p class="footer-text">
         {{ showRegister ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?' }}
         <a (click)="showRegister = !showRegister" class="toggle-link">

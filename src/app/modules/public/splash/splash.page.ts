@@ -15,7 +15,6 @@ export class SplashPage implements OnInit {
   constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
-    // Esperar 2 segundos y redirigir según autenticación
     setTimeout(() => {
       this.authService.isAuthenticated().subscribe(isAuth => {
         if (isAuth) {

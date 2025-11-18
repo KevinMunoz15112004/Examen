@@ -10,7 +10,7 @@ import { Plan } from '../models';
 })
 export class PlanesService {
   private planes$ = new BehaviorSubject<Plan[]>([]);
-  private planesRefresh$ = interval(5000); // Actualizar cada 5 segundos
+  private planesRefresh$ = interval(5000); 
 
   constructor(
     private supabaseService: SupabaseService,
@@ -22,10 +22,8 @@ export class PlanesService {
   private initializeRealtime(): void {
     const supabase = this.supabaseService.getClient();
     
-    // Cargar planes iniciales
     this.loadPlanes();
 
-    // Suscribirse a cambios en tiempo real
     const subscription = supabase
       .channel('planes_changes')
       .on(
@@ -49,7 +47,7 @@ export class PlanesService {
       .from('planes_moviles')
       .select('*')
       .eq('activo', true)
-      .order('precio', { ascending: true })
+      .order('created_at', { ascending: false })
     ).pipe(
       map(({ data, error }) => {
         if (error) {
@@ -95,22 +93,20 @@ export class PlanesService {
   createPlan(plan: Omit<Plan, 'id' | 'created_at' | 'updated_at'>): Observable<Plan | null> {
     const supabase = this.supabaseService.getClient();
 
-    // Obtener el usuario actual sincronicamente desde el BehaviorSubject
     const currentUserObs = this.authService.getCurrentUser();
-    
-    // Necesitamos usar switchMap para obtener el usuario de forma Observable
+
     return currentUserObs.pipe(
       switchMap(currentUser => {
         if (!currentUser || !currentUser.id) {
-          console.error('❌ No hay usuario autenticado para crear plan');
+          console.error('No hay usuario autenticado para crear plan');
           return from(Promise.resolve(null));
         }
 
-        console.log('📝 Creando plan para user_id:', currentUser.id);
+        console.log('Creando plan para user_id:', currentUser.id);
 
         return from(
           supabase.rpc('crear_plan_asesor', {
-            p_user_id: currentUser.id,  // <<<< NUEVO: Pasar user_id como parámetro
+            p_user_id: currentUser.id, 
             p_nombre: plan.nombre,
             p_descripcion: plan.descripcion,
             p_precio: plan.precio,
@@ -128,32 +124,25 @@ export class PlanesService {
           })
         ).pipe(
           switchMap(async (result: any) => {
-            // Debug: registrar la respuesta completa
             console.log('RPC Response crear_plan_asesor:', result);
             
-            // Validar que result existe y tiene estructura correcta
             if (!result) {
-              console.error('❌ RPC retornó null/undefined');
+              console.error('RPC retornó null/undefined');
               return { error: 'RPC retornó null', data: null } as any;
             }
 
-            // CASO 1: Respuesta de Supabase wrapper {error: null, data: {...}, status: 200}
             if (result.status !== undefined && result.status === 200) {
-              // Verificar si el data contiene {success: false}
               if (result.data?.success === false) {
-                console.error('❌ Función retornó error:', result.data.error);
+                console.error('Función retornó error:', result.data.error);
                 return { error: result.data.error, data: null } as any;
               }
 
-              console.log('✅ Plan creado exitosamente (Supabase wrapper)');
-              
-              // Pequeño delay para que la BD se sincronice
+              console.log('Plan creado exitosamente (Supabase wrapper)');
+
               await new Promise(resolve => setTimeout(resolve, 300));
 
-              // Recargar planes
               this.loadPlanes();
 
-              // Retornar el plan creado (aproximado)
               return {
                 data: {
                   ...plan,
@@ -165,17 +154,13 @@ export class PlanesService {
               };
             }
 
-            // CASO 2: Respuesta JSON de la función {success: true, ...}
             if (typeof result === 'object' && result.success === true) {
               console.log('✅ Plan creado exitosamente (JSON function):', result.data);
-              
-              // Pequeño delay para que la BD se sincronice
+
               await new Promise(resolve => setTimeout(resolve, 300));
 
-              // Recargar planes
               this.loadPlanes();
 
-              // Retornar el plan creado (aproximado)
               return {
                 data: {
                   ...plan,
@@ -187,20 +172,16 @@ export class PlanesService {
               };
             }
 
-            // CASO 3: Error en respuesta JSON {success: false, error: '...'}
             if (typeof result === 'object' && result.success === false) {
-              console.error('❌ Plan creation failed:', result.error);
+              console.error('Plan creation failed:', result.error);
               console.error('Error context:', result.error_context);
               return { error: result.error, data: null } as any;
             }
 
-            // FALLBACK: Si llegamos aquí, asumir éxito (ya que no hay error)
             console.warn('⚠️ Unexpected RPC response format, pero sin error - asumiendo éxito:', result);
-            
-            // Pequeño delay para que la BD se sincronice
+
             await new Promise(resolve => setTimeout(resolve, 300));
 
-            // Recargar planes
             this.loadPlanes();
 
             return {

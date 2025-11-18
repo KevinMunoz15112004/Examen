@@ -47,31 +47,28 @@ export class AdvisorChatPage implements OnInit, OnDestroy {
       this.mensajes$ = this.chatService.getMensajes(this.contratacionId, true);
       this.isLoading = false;
       
-      // Scroll al final cuando cargan los mensajes
       setTimeout(() => this.scrollToBottom(), 300);
     });
   }
 
   ionViewDidEnter() {
-    // Iniciar polling cuando entra en la página
-    console.log('📱 Entrando a chat del asesor, iniciando polling...');
+    console.log('Entrando a chat del asesor, iniciando polling...');
     this.startPolling();
   }
 
   ionViewDidLeave() {
-    // Detener polling cuando sale de la página
-    console.log('📱 Saliendo de chat del asesor, deteniendo polling...');
+    console.log('Saliendo de chat del asesor, deteniendo polling...');
     this.stopPolling();
   }
 
   private startPolling() {
     if (this.pollingInterval) {
-      return; // Ya está corriendo
+      return; 
     }
     
     this.pollingInterval = setInterval(() => {
       this.mensajes$ = this.chatService.getMensajes(this.contratacionId, true);
-    }, 3000); // Polling cada 3 segundos
+    }, 3000);
   }
 
   private stopPolling() {
@@ -107,14 +104,13 @@ export class AdvisorChatPage implements OnInit, OnDestroy {
       return;
     }
 
-    // Obtener el usuario actual
     this.currentUser$.pipe(take(1)).subscribe((user: User | null) => {
       if (!user) {
-        console.error('❌ Usuario no autenticado');
+        console.error('Usuario no autenticado');
         return;
       }
 
-      console.log('📤 Enviando mensaje:', this.nuevoMensaje);
+      console.log('Enviando mensaje:', this.nuevoMensaje);
       
       this.chatService.enviarMensajeAsesor(
         this.contratacionId,
@@ -124,12 +120,11 @@ export class AdvisorChatPage implements OnInit, OnDestroy {
         success => {
           if (success) {
             this.nuevoMensaje = '';
-            // El polling actualizará los mensajes automáticamente en 3 segundos
-            console.log('✅ Mensaje enviado');
+            console.log('Mensaje enviado');
           }
         },
         error => {
-          console.error('❌ Error enviando mensaje:', error);
+          console.error('Error enviando mensaje:', error);
         }
       );
     });
