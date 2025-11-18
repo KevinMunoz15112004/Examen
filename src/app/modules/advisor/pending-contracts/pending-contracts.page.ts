@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ContratacionesService } from '../../../services/contrataciones.service';
 import { ContratacionDetalle } from '../../../models';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject, switchMap  } from 'rxjs';
 import { ToastController, AlertController, IonicModule } from '@ionic/angular';
 
 @Component({
@@ -14,6 +14,7 @@ import { ToastController, AlertController, IonicModule } from '@ionic/angular';
   imports: [CommonModule, IonicModule]
 })
 export class PendingContractsPage implements OnInit {
+  private refreshSubject = new BehaviorSubject<void>(undefined);
   contratacionesPendientes$: Observable<ContratacionDetalle[]>;
   isLoading = true;
 
@@ -23,11 +24,15 @@ export class PendingContractsPage implements OnInit {
     private toastController: ToastController,
     private alertController: AlertController
   ) {
-    this.contratacionesPendientes$ = this.contratacionesService.getContratacionesPendientes();
+    this.contratacionesPendientes$ = this.refreshSubject.pipe(
+      switchMap(() => this.contratacionesService.getContratacionesPendientes())
+    );
   }
 
   ngOnInit() {
     this.isLoading = false;
+    // Inicializar la carga de contrataciones pendientes
+    this.refreshSubject.next(undefined);
   }
 
   goBack() {
@@ -46,13 +51,23 @@ export class PendingContractsPage implements OnInit {
         {
           text: 'Aprobar',
           handler: () => {
+            console.log('✅ Aprobando contratación:', contratacionId);
             this.contratacionesService.actualizarEstadoContratacion(contratacionId, 'activa').subscribe(
               async success => {
+                console.log('📊 Resultado de aprobación:', success);
                 if (success) {
                   await this.presentToast('¡Contratación aprobada!', 'success');
+                  // Refrescar lista después de un pequeño delay para asegurar que Supabase procesó el cambio
+                  setTimeout(() => {
+                    this.refreshSubject.next(undefined);
+                  }, 500);
                 } else {
                   await this.presentToast('Error al aprobar', 'danger');
                 }
+              },
+              error => {
+                console.error('❌ Error en aprobación:', error);
+                this.presentToast('Error al aprobar la contratación', 'danger');
               }
             );
           },
@@ -75,13 +90,23 @@ export class PendingContractsPage implements OnInit {
         {
           text: 'Rechazar',
           handler: () => {
+            console.log('❌ Rechazando contratación:', contratacionId);
             this.contratacionesService.actualizarEstadoContratacion(contratacionId, 'cancelada').subscribe(
               async success => {
+                console.log('📊 Resultado de rechazo:', success);
                 if (success) {
                   await this.presentToast('¡Contratación rechazada!', 'success');
+                  // Refrescar lista después de un pequeño delay para asegurar que Supabase procesó el cambio
+                  setTimeout(() => {
+                    this.refreshSubject.next(undefined);
+                  }, 500);
                 } else {
                   await this.presentToast('Error al rechazar', 'danger');
                 }
+              },
+              error => {
+                console.error('❌ Error en rechazo:', error);
+                this.presentToast('Error al rechazar la contratación', 'danger');
               }
             );
           },

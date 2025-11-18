@@ -1,0 +1,52 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button (click)="goBack()" text="" defaultHref="/advisor/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Contrataciones Canceladas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="cancelled-content">
+  <div class="content-inner">
+    <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+
+    <div *ngIf="!isLoading" class="cancelled-list">
+      <ion-card 
+        *ngFor="let contrato of (contratacionesCanceladas$ | async)" 
+        class="cancelled-card"
+      >
+        <ion-card-content>
+          <div class="card-header">
+            <div>
+              <h2>{{ contrato.plan_nombre }}</h2>
+              <p class="client-name">Cliente: {{ contrato.usuario_nombre }}</p>
+            </div>
+            <ion-badge color="danger">Cancelada</ion-badge>
+          </div>
+
+          <div class="card-details">
+            <div class="detail-item">
+              <ion-icon name="person"></ion-icon>
+              <span>{{ contrato.usuario_nombre }}</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon name="calendar"></ion-icon>
+              <span>{{ contrato.created_at | date: 'short' }}</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon name="cash"></ion-icon>
+              <span>${{ contrato.precio_mensual }}/mes</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <div *ngIf="!(contratacionesCanceladas$ | async) || (contratacionesCanceladas$ | async)?.length === 0" class="no-contracts">
+        <ion-icon name="close-circle"></ion-icon>
+        <h3>Sin contrataciones canceladas</h3>
+        <p>No hay planes rechazados en este momento.</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

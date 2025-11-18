@@ -18,17 +18,17 @@
 
   <!-- Statistics -->
   <div class="stats-grid" *ngIf="stats$ | async as stats">
-    <ion-card class="stat-card">
-      <div class="stat-number">{{ stats.totalPlanes }}</div>
-      <div class="stat-label">Planes Activos</div>
-    </ion-card>
-    <ion-card class="stat-card">
+    <ion-card class="stat-card pending">
       <div class="stat-number">{{ stats.contratacionesPendientes }}</div>
       <div class="stat-label">Pendientes</div>
     </ion-card>
-    <ion-card class="stat-card">
+    <ion-card class="stat-card active">
       <div class="stat-number">{{ stats.contratacionesActivas }}</div>
       <div class="stat-label">Activas</div>
+    </ion-card>
+    <ion-card class="stat-card cancelled">
+      <div class="stat-number">{{ stats.contratacionesCanceladas }}</div>
+      <div class="stat-label">Canceladas</div>
     </ion-card>
   </div>
 
@@ -51,6 +51,26 @@
         </div>
         <h3>Contrataciones Pendientes</h3>
         <p>Revisa las solicitudes de clientes</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="action-card active-contracts" (click)="goToActiveContracts()">
+      <ion-card-content>
+        <div class="action-icon">
+          <ion-icon name="checkmark-circle"></ion-icon>
+        </div>
+        <h3>Contrataciones Activas</h3>
+        <p>Planes que aceptaste</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="action-card cancelled-contracts" (click)="goToCancelledContracts()">
+      <ion-card-content>
+        <div class="action-icon">
+          <ion-icon name="close-circle"></ion-icon>
+        </div>
+        <h3>Contrataciones Canceladas</h3>
+        <p>Planes que rechazaste</p>
       </ion-card-content>
     </ion-card>
 

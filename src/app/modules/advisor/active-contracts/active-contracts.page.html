@@ -1,0 +1,52 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button (click)="goBack()" text="" defaultHref="/advisor/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Contrataciones Activas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="active-content">
+  <div class="content-inner">
+    <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+
+    <div *ngIf="!isLoading" class="active-list">
+      <ion-card 
+        *ngFor="let contrato of (contratacionesActivas$ | async)" 
+        class="active-card"
+      >
+        <ion-card-content>
+          <div class="card-header">
+            <div>
+              <h2>{{ contrato.plan_nombre }}</h2>
+              <p class="client-name">Cliente: {{ contrato.usuario_nombre }}</p>
+            </div>
+            <ion-badge color="success">Activa</ion-badge>
+          </div>
+
+          <div class="card-details">
+            <div class="detail-item">
+              <ion-icon name="person"></ion-icon>
+              <span>{{ contrato.usuario_nombre }}</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon name="calendar"></ion-icon>
+              <span>{{ contrato.created_at | date: 'short' }}</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon name="cash"></ion-icon>
+              <span>${{ contrato.precio_mensual }}/mes</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <div *ngIf="!(contratacionesActivas$ | async) || (contratacionesActivas$ | async)?.length === 0" class="no-contracts">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        <h3>Sin contrataciones activas</h3>
+        <p>No hay planes activos en este momento.</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

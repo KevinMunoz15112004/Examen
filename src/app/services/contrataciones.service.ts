@@ -125,23 +125,79 @@ export class ContratacionesService {
     );
   }
 
-  actualizarEstadoContratacion(contratacionId: string, nuevoEstado: string): Observable<boolean> {
+  getTodasLasContrataciones(): Observable<ContratacionDetalle[]> {
     const supabase = this.supabaseService.getClient();
 
     return from(supabase
-      .from('contrataciones')
-      .update({
-        estado: nuevoEstado,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', contratacionId)
+      .from('vw_contrataciones_detalle')
+      .select('*')
+      .order('created_at', { ascending: false })
     ).pipe(
-      map(({ error }) => {
+      map(({ data, error }) => {
         if (error) {
-          console.error('Error actualizando estado:', error);
+          console.error('Error cargando todas las contrataciones:', error);
+          return [];
+        }
+        console.log('📊 Todas las contrataciones cargadas:', data?.length);
+        console.log('   Estados:', data?.map(c => c.estado));
+        return data as ContratacionDetalle[];
+      })
+    );
+  }
+
+  actualizarEstadoContratacion(contratacionId: string, nuevoEstado: string): Observable<boolean> {
+    const supabase = this.supabaseService.getClient();
+
+    console.log('🔄 Actualizando estado de contratación:', contratacionId, 'a', nuevoEstado);
+
+    // Usar RPC en lugar de actualización directa para bypassear RLS
+    return from(supabase.rpc('actualizar_estado_contratacion', {
+      p_contratacion_id: contratacionId,
+      p_nuevo_estado: nuevoEstado
+    })).pipe(
+      switchMap(async (result: any) => {
+        console.log('📊 Respuesta bruta de RPC:', result);
+        
+        if (!result) {
+          console.error('❌ RPC retornó null/undefined');
           return false;
         }
-        return true;
+
+        // La respuesta viene en la estructura: {error: null, data: {...}, status: 200}
+        // Necesitamos acceder a result.data si existe
+        let responseData = result;
+        
+        // Si tenemos la estructura de Supabase, extraer el data
+        if (result.data !== undefined && result.status !== undefined) {
+          responseData = result.data;
+          console.log('📦 Datos extraídos de respuesta Supabase:', responseData);
+        }
+        
+        // Si es string, parsear como JSON
+        if (typeof responseData === 'string') {
+          try {
+            responseData = JSON.parse(responseData);
+            console.log('📦 JSON parseado:', responseData);
+          } catch (e) {
+            console.error('❌ Error parseando JSON:', e);
+            return false;
+          }
+        }
+
+        console.log('🔍 Datos finales a verificar:', responseData);
+
+        // Verificar si la actualización fue exitosa
+        if (responseData && responseData.success === true) {
+          console.log('✅ Estado actualizado correctamente. Filas afectadas:', responseData.rows_affected);
+          return true;
+        } else {
+          console.error('❌ Error en RPC:', responseData?.error || 'sin error detallado');
+          return false;
+        }
+      }),
+      catchError((err: any) => {
+        console.error('❌ Error en RPC de actualización:', err);
+        return of(false);
       })
     );
   }

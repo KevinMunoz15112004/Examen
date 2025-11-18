@@ -19,7 +19,7 @@ import { map } from 'rxjs/operators';
 export class DashboardPage implements OnInit {
   currentUser$: Observable<User | null>;
   planes$: Observable<Plan[]>;
-  contratacionesPendientes$: Observable<ContratacionDetalle[]>;
+  todasLasContrataciones$: Observable<ContratacionDetalle[]>;
   stats$: Observable<any>;
 
   constructor(
@@ -30,17 +30,33 @@ export class DashboardPage implements OnInit {
   ) {
     this.currentUser$ = this.authService.getCurrentUser();
     this.planes$ = this.planesService.getPlanes();
-    this.contratacionesPendientes$ = this.contratacionesService.getContratacionesPendientes();
+    this.todasLasContrataciones$ = this.contratacionesService.getTodasLasContrataciones();
 
     this.stats$ = combineLatest([
       this.planes$,
-      this.contratacionesPendientes$
+      this.todasLasContrataciones$
     ]).pipe(
-      map(([planes, contratos]) => ({
-        totalPlanes: planes.length,
-        contratacionesPendientes: contratos.filter(c => c.estado === 'pendiente').length,
-        contratacionesActivas: contratos.filter(c => c.estado === 'activa').length
-      }))
+      map(([planes, contratos]) => {
+        console.log('📊 Stats calculados:');
+        console.log('  - Planes:', planes.length);
+        console.log('  - Contratos totales recibidos:', contratos.length);
+        console.log('  - Contratos estado:', contratos.map(c => ({ id: c.id, estado: c.estado })));
+        
+        const pendientes = contratos.filter(c => c.estado === 'pendiente');
+        const activas = contratos.filter(c => c.estado === 'activa');
+        const canceladas = contratos.filter(c => c.estado === 'cancelada');
+        
+        console.log('  - Pendientes filtrados:', pendientes.length);
+        console.log('  - Activas filtradas:', activas.length);
+        console.log('  - Canceladas filtradas:', canceladas.length);
+        
+        return {
+          totalPlanes: planes.length,
+          contratacionesPendientes: pendientes.length,
+          contratacionesActivas: activas.length,
+          contratacionesCanceladas: canceladas.length
+        };
+      })
     );
   }
 
@@ -56,6 +72,14 @@ export class DashboardPage implements OnInit {
 
   goToPendingContracts() {
     this.router.navigate(['/advisor/pending-contracts']);
+  }
+
+  goToActiveContracts() {
+    this.router.navigate(['/advisor/active-contracts']);
+  }
+
+  goToCancelledContracts() {
+    this.router.navigate(['/advisor/cancelled-contracts']);
   }
 
   goToChatList() {

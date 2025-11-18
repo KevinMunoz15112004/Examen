@@ -33,15 +33,36 @@ ion-toolbar {
 
 .segment-filter {
   --background: #ffffff;
-  margin: 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 12px 8px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 
   ion-segment-button {
     --background-active: #667eea;
     --color-active: white;
     --indicator-color: transparent;
+    --color: #666;
     font-weight: 500;
+    font-size: 13px;
+    flex: 1;
+    min-width: 70px;
+    white-space: nowrap;
+    padding: 8px 12px;
+
+    @media (min-width: 480px) {
+      min-width: 85px;
+      font-size: 14px;
+    }
+
+    @media (min-width: 768px) {
+      min-width: 100px;
+      font-size: 15px;
+      padding: 10px 16px;
+    }
   }
 }
 

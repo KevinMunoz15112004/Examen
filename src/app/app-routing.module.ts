@@ -65,6 +65,16 @@ const routes: Routes = [
     canActivate: [AuthGuard, AdvisorGuard]
   },
   {
+    path: 'advisor/active-contracts',
+    loadComponent: () => import('./modules/advisor/active-contracts/active-contracts.page').then(m => m.ActiveContractsPage),
+    canActivate: [AuthGuard, AdvisorGuard]
+  },
+  {
+    path: 'advisor/cancelled-contracts',
+    loadComponent: () => import('./modules/advisor/cancelled-contracts/cancelled-contracts.page').then(m => m.CancelledContractsPage),
+    canActivate: [AuthGuard, AdvisorGuard]
+  },
+  {
     path: 'advisor/chat-list',
     loadChildren: () => import('./modules/advisor/chat-list/chat-list.module').then(m => m.ChatListPageModule),
     canActivate: [AuthGuard, AdvisorGuard]

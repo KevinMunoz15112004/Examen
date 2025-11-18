@@ -41,29 +41,38 @@ export class AuthService {
     private loadUserProfile(userId: string): void {
         const supabase = this.supabaseService.getClient();
 
-        from(supabase
-            .from('perfiles')
-            .select('*')
-            .match({ user_id: userId })
-            .single()
-        ).pipe(
-            map(({ data, error }) => {
-                if (error || !data) return null;
-                return {
-                    id: data.user_id,
-                    email: '',
-                    full_name: data.full_name,
-                    phone: data.phone,
-                    role: data.rol as UserRole,
-                    avatar_url: data.avatar_url,
-                    created_at: data.created_at,
-                    updated_at: data.updated_at
-                } as User;
-            })
-        ).subscribe(user => {
-            if (user) {
-                this.currentUser$.next(user);
+        // Primero, obtener el email del usuario autenticado
+        supabase.auth.getUser().then(({ data: { user }, error: userError }) => {
+            if (userError || !user) {
+                console.error('Error getting user:', userError);
+                return;
             }
+
+            // Luego, obtener el perfil del usuario
+            from(supabase
+                .from('perfiles')
+                .select('*')
+                .match({ user_id: userId })
+                .single()
+            ).pipe(
+                map(({ data, error }) => {
+                    if (error || !data) return null;
+                    return {
+                        id: data.user_id,
+                        email: user.email || '', // Usar el email del usuario autenticado
+                        full_name: data.full_name,
+                        phone: data.phone,
+                        role: data.rol as UserRole,
+                        avatar_url: data.avatar_url,
+                        created_at: data.created_at,
+                        updated_at: data.updated_at
+                    } as User;
+                })
+            ).subscribe(user => {
+                if (user) {
+                    this.currentUser$.next(user);
+                }
+            });
         });
     }
 
@@ -187,13 +196,17 @@ export class AuthService {
     loginAdvisor(email: string, password: string): Observable<AuthResponse> {
         const supabase = this.supabaseService.getClient();
 
-        // Primero, validar que el asesor existe en la tabla de asesores
-        return from(supabase
-            .from('asesores')
-            .select('*')
-            .eq('email', email)
-            .single()
-        ).pipe(
+        // Primero, cerrar cualquier sesión activa para evitar conflictos
+        return from(supabase.auth.signOut()).pipe(
+            switchMap(() => {
+                // Luego, buscar en la tabla de asesores
+                return from(supabase
+                    .from('asesores')
+                    .select('*')
+                    .eq('email', email)
+                    .single()
+                );
+            }),
             switchMap(async ({ data: advisor, error: advisorError }) => {
                 if (advisorError || !advisor) {
                     return { error: 'Credenciales de asesor no válidas' } as AuthResponse;
@@ -261,6 +274,15 @@ export class AuthService {
             map(() => {
                 this.currentUser$.next(null);
                 this.isAuthenticated$.next(false);
+
+                // Limpiar almacenamiento
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Forzar recarga de página para limpiar completamente
+                setTimeout(() => {
+                    window.location.reload();
+                }, 300);
             })
         );
     }

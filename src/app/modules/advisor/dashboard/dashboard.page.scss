@@ -47,11 +47,36 @@ ion-button {
     text-align: center;
     background: white;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #95a5a6;
+    transition: all 0.3s ease;
+
+    &.pending {
+      border-left-color: #f39c12;
+      
+      .stat-number {
+        color: #f39c12;
+      }
+    }
+
+    &.active {
+      border-left-color: #27ae60;
+      
+      .stat-number {
+        color: #27ae60;
+      }
+    }
+
+    &.cancelled {
+      border-left-color: #e74c3c;
+      
+      .stat-number {
+        color: #e74c3c;
+      }
+    }
 
     .stat-number {
       font-size: 28px;
       font-weight: bold;
-      color: #e74c3c;
       padding: 12px 0 4px;
     }
 
@@ -60,6 +85,10 @@ ion-button {
       color: #7f8c8d;
       padding: 0 0 12px;
       font-weight: 600;
+    }
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
   }
 }
@@ -72,10 +101,27 @@ ion-button {
     border-radius: 8px;
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-left: 4px solid #e74c3c;
 
     &:hover {
       transform: translateY(-4px);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    &.active-contracts {
+      border-left-color: #27ae60;
+
+      ion-card-content .action-icon {
+        color: #27ae60;
+      }
+    }
+
+    &.cancelled-contracts {
+      border-left-color: #e74c3c;
+
+      ion-card-content .action-icon {
+        color: #e74c3c;
+      }
     }
 
     ion-card-content {
