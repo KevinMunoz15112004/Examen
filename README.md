@@ -6,7 +6,7 @@ Nombre: Kevin Muñoz
 
 ## APK
 
-Para probar el apk: [APK]()
+Para probar el apk: [APK](android/app/build/outputs/apk/debug)
 
 ## Roles
 
@@ -115,6 +115,7 @@ Cuando un cliente escribe sobre un plan y está interesado, le llegará al aseso
 Y al abrir el mensaje ya podrán hablar:
 
 <img width="237" height="500" alt="image" src="https://github.com/user-attachments/assets/a2ff6f7d-0e5f-469b-892a-ffbf7a712709" />
+
 
 
 
